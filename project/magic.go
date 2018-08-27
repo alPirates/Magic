@@ -8,6 +8,11 @@ type Magic struct {
 	router *Router
 }
 
+// MaxBytes
+var (
+	MaxBytes = int64(10000000)
+)
+
 // NewMagic function
 func NewMagic(port string) *Magic {
 	var magic *Magic
@@ -29,23 +34,28 @@ func (magic *Magic) CreateRoute(path string, middlewares ...Middleware) *Route {
 }
 
 // GET function
-func (magic *Magic) GET(path string, handler func(context Context) (int, error)) {
+func (magic *Magic) GET(path string, handler func(context *Context) error) {
 	magic.router.mainRoute.add(path, "GET", handler)
 }
 
 // POST function
-func (magic *Magic) POST(path string, handler func(context Context) (int, error)) {
+func (magic *Magic) POST(path string, handler func(context *Context) error) {
 	magic.router.mainRoute.add(path, "POST", handler)
 }
 
 // PUT function
-func (magic *Magic) PUT(path string, handler func(context Context) (int, error)) {
+func (magic *Magic) PUT(path string, handler func(context *Context) error) {
 	magic.router.mainRoute.add(path, "PUT", handler)
 }
 
 // DELETE function
-func (magic *Magic) DELETE(path string, handler func(context Context) (int, error)) {
+func (magic *Magic) DELETE(path string, handler func(context *Context) error) {
 	magic.router.mainRoute.add(path, "DELETE", handler)
+}
+
+// SetMaxBytes function
+func (magic *Magic) SetMaxBytes(maxBytes int64) {
+	MaxBytes = maxBytes
 }
 
 // ListenAndServe function

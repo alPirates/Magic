@@ -6,10 +6,10 @@ import (
 
 // Route structure
 type Route struct {
-	handlerPOST   func(Context) (int, error)
-	handlerGET    func(Context) (int, error)
-	handlerDELETE func(Context) (int, error)
-	handlerPUT    func(Context) (int, error)
+	handlerPOST   func(*Context) error
+	handlerGET    func(*Context) error
+	handlerDELETE func(*Context) error
+	handlerPUT    func(*Context) error
 	middlewares   []Middleware
 	branches      map[string]*Route
 	param         *Route
@@ -33,26 +33,26 @@ func (route *Route) CreateRoute(path string, middlewares ...Middleware) *Route {
 }
 
 // GET function
-func (route *Route) GET(path string, handler func(context Context) (int, error)) {
+func (route *Route) GET(path string, handler func(context *Context) error) {
 	route.add(path, "GET", handler)
 }
 
 // POST function
-func (route *Route) POST(path string, handler func(context Context) (int, error)) {
+func (route *Route) POST(path string, handler func(context *Context) error) {
 	route.add(path, "POST", handler)
 }
 
 // PUT function
-func (route *Route) PUT(path string, handler func(context Context) (int, error)) {
+func (route *Route) PUT(path string, handler func(context *Context) error) {
 	route.add(path, "PUT", handler)
 }
 
 // DELETE function
-func (route *Route) DELETE(path string, handler func(context Context) (int, error)) {
+func (route *Route) DELETE(path string, handler func(context *Context) error) {
 	route.add(path, "DELETE", handler)
 }
 
-func (route *Route) add(path, method string, handler func(Context) (int, error)) {
+func (route *Route) add(path, method string, handler func(*Context) error) {
 	nowRoute := route
 	branches := strings.Split(path, "/")
 	len := len(branches)
@@ -118,7 +118,7 @@ func (route *Route) createRoute(path string) *Route {
 
 }
 
-func (route *Route) find(path, method string) (func(Context) (int, error), []Middleware, map[string]string) {
+func (route *Route) find(path, method string) (func(*Context) error, []Middleware, map[string]string) {
 	nowRoute := route
 	params := make(map[string]string)
 	middlewares := []Middleware{}
@@ -139,7 +139,7 @@ func (route *Route) find(path, method string) (func(Context) (int, error), []Mid
 		middlewares = append(middlewares, nowRoute.middlewares...)
 	}
 
-	var result func(Context) (int, error)
+	var result func(*Context) error
 	switch method {
 	case "POST":
 		result = nowRoute.handlerPOST

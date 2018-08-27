@@ -1,7 +1,10 @@
 package magic
 
 import (
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"net/url"
 )
 
 // Router structure
@@ -21,29 +24,53 @@ func NewRouter() *Router {
 // Handle interface
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler, middlewares, params := router.mainRoute.find(r.URL.Path, r.Method)
-	// queryParams := r.
-
-	context := getContext(w, r, params)
-
+	context := getContext(w, r)
 	if handler != nil {
+
+		context.Params = params
+		bytes, _ := ioutil.ReadAll(r.Body)
+		context.RawJSON = string(bytes)
+		queryParams, err := url.ParseQuery(r.URL.RawQuery)
+		if err == nil {
+			context.QueryParams = map[string][]string(queryParams)
+		}
+
+		err = r.ParseForm()
+		if err == nil {
+			postParams := map[string][]string(r.PostForm)
+			context.PostParams = postParams
+		}
+
+		err = r.ParseMultipartForm(MaxBytes)
+		if err == nil {
+			multipartParams := map[string][]string(r.MultipartForm.Value)
+			context.MultipartParams = multipartParams
+			files := map[string][]*multipart.FileHeader(r.MultipartForm.File)
+			context.FileParams = files
+		}
+
+		headers := map[string][]string(r.Header)
+
+		context.Headers = headers
+
 		startHandler(context, middlewares, handler)
 	} else {
-		http.NotFound(w, r)
+		context.SendErrorString("page not found")
 	}
 }
 
-func startHandler(context Context, middlewares []Middleware, handler func(context Context) (int, error)) {
+func startHandler(context *Context, middlewares []Middleware, handler func(context *Context) error) {
 
 	for _, middleware := range middlewares {
-		code, err := middleware.run(context)
+		err := middleware.run(context)
 		if err != nil {
-			http.Error(context.Writer, err.Error(), code)
+			return
 		}
 	}
 
-	code, err := handler(context)
+	err := handler(context)
 	if err != nil {
-		http.Error(context.Writer, err.Error(), code)
+		return
 	}
 
 }
