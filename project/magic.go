@@ -2,6 +2,7 @@ package magic
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -98,5 +99,20 @@ func (magic *Magic) SetMaxBytes(maxBytes int64) {
 // ListenAndServe function
 // Start server
 func (magic *Magic) ListenAndServe() {
+	fmt.Println("")
+	fmt.Println(
+		` -----------------------------------------------------`)
+	fmt.Println("")
+	fmt.Println(" "+
+		`    __   __     __     _______    ________   _______`+"\n",
+		`   /  | /  |   /  \   |   ____|  |__    __| |   ____|`+"\n",
+		`  /   |/   |  / /\ \  |  | ____     |  |    |  |`+"\n",
+		` /   __    | |  \/  | |  |__|  |  __|  |__  |  |____`+"\n",
+		`/___/  |___| |__/\__| |________| |________| |_______|`+"\n",
+	)
+	fmt.Println("")
+	fmt.Println(
+		` -----------------------------------------------------`)
+	fmt.Println("")
 	magic.server.ListenAndServe()
 }
