@@ -34,6 +34,7 @@ type Context struct {
 }
 
 // SendError function
+// send your error like {"message": "error message"}
 func (context *Context) SendError(err error) error {
 	message := make(map[string]interface{})
 	message["message"] = err.Error()
@@ -43,6 +44,7 @@ func (context *Context) SendError(err error) error {
 }
 
 // SendErrorString function
+// Send your error like {"message": "your string"}
 func (context *Context) SendErrorString(errorStr string) error {
 	message := make(map[string]interface{})
 	message["message"] = errorStr
@@ -52,6 +54,7 @@ func (context *Context) SendErrorString(errorStr string) error {
 }
 
 // SendJSON function
+// Send pretty json like {"string" : "interface", ...}
 func (context *Context) SendJSON(j map[string]interface{}) error {
 	str, _ := json.MarshalIndent(j, "", "    ")
 	fmt.Fprint(context.Writer, string(str))
@@ -59,27 +62,33 @@ func (context *Context) SendJSON(j map[string]interface{}) error {
 }
 
 // SendString function
+// Send string leke "something"
 func (context *Context) SendString(str string) error {
 	fmt.Fprint(context.Writer, str)
 	return nil
 }
 
 // ParseJSON function
+// Parse JSON in body to your interface
 func (context *Context) ParseJSON(iface interface{}) error {
 	err := json.Unmarshal([]byte(context.RawJSON), iface)
 	return err
 }
 
 // FilesArr structure
+// It is map[string][]*multipart.FileHeader
 type FilesArr map[string][]*multipart.FileHeader
 
 // Values structure
+// It is map[string]string
 type Values map[string]string
 
 // ValuesArr structure
+// It is map[string][]string
 type ValuesArr map[string][]string
 
 // ParseInt function
+// Return int and error if can't parse
 func (values Values) ParseInt(key string) (int, error) {
 	str := values[key]
 	i, err := strconv.ParseInt(str, 10, 32)
@@ -87,6 +96,7 @@ func (values Values) ParseInt(key string) (int, error) {
 }
 
 // ParseUint function
+// Return uint and error if can't parse
 func (values Values) ParseUint(key string) (uint, error) {
 	str := values[key]
 	i, err := strconv.ParseUint(str, 10, 32)
@@ -94,6 +104,7 @@ func (values Values) ParseUint(key string) (uint, error) {
 }
 
 // ParseFloat function
+// Return float and error if can't parse
 func (values Values) ParseFloat(key string) (float32, error) {
 	str := values[key]
 	i, err := strconv.ParseFloat(str, 32)
@@ -101,6 +112,7 @@ func (values Values) ParseFloat(key string) (float32, error) {
 }
 
 // ParseBool function
+// Return bool and error if can't parse
 func (values Values) ParseBool(key string) (bool, error) {
 	str := values[key]
 	i, err := strconv.ParseBool(str)
@@ -108,12 +120,14 @@ func (values Values) ParseBool(key string) (bool, error) {
 }
 
 // ParseString function
+// Return string, error always nil
 func (values Values) ParseString(key string) (string, error) {
 	str := values[key]
 	return str, nil
 }
 
 // ParseInt function
+// Return first int and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseInt(key string) (int, error) {
 	str := valuesArr[key]
 	if len(str) == 0 {
@@ -125,6 +139,7 @@ func (valuesArr ValuesArr) ParseInt(key string) (int, error) {
 }
 
 // ParseUint function
+// Return first uint and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseUint(key string) (uint, error) {
 	str := valuesArr[key]
 	if len(str) == 0 {
@@ -136,6 +151,7 @@ func (valuesArr ValuesArr) ParseUint(key string) (uint, error) {
 }
 
 // ParseFloat function
+// Return first float and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseFloat(key string) (float32, error) {
 	str := valuesArr[key]
 	if len(str) == 0 {
@@ -147,6 +163,7 @@ func (valuesArr ValuesArr) ParseFloat(key string) (float32, error) {
 }
 
 // ParseBool function
+// Return first bool and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseBool(key string) (bool, error) {
 	str := valuesArr[key]
 	if len(str) == 0 {
@@ -158,6 +175,7 @@ func (valuesArr ValuesArr) ParseBool(key string) (bool, error) {
 }
 
 // ParseString function
+// Return first string and error if empty string
 func (valuesArr ValuesArr) ParseString(key string) (string, error) {
 	str := valuesArr[key]
 	if len(str) == 0 {
@@ -168,6 +186,7 @@ func (valuesArr ValuesArr) ParseString(key string) (string, error) {
 }
 
 // ParseInts function
+// Return []int and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseInts(key string) ([]int, error) {
 	str := valuesArr[key]
 	var mas []int
@@ -182,6 +201,7 @@ func (valuesArr ValuesArr) ParseInts(key string) ([]int, error) {
 }
 
 // ParseUints function
+// Return []uint and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseUints(key string) ([]uint, error) {
 	str := valuesArr[key]
 	var mas []uint
@@ -196,6 +216,7 @@ func (valuesArr ValuesArr) ParseUints(key string) ([]uint, error) {
 }
 
 // ParseFloats function
+// Return []float and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseFloats(key string) ([]float32, error) {
 	str := valuesArr[key]
 	var mas []float32
@@ -210,6 +231,7 @@ func (valuesArr ValuesArr) ParseFloats(key string) ([]float32, error) {
 }
 
 // ParseBools function
+// Return []bool and error if can't parse or empty string
 func (valuesArr ValuesArr) ParseBools(key string) ([]bool, error) {
 	str := valuesArr[key]
 	var mas []bool
@@ -224,12 +246,14 @@ func (valuesArr ValuesArr) ParseBools(key string) ([]bool, error) {
 }
 
 // ParseStrings function
+// Return []string and error always nil
 func (valuesArr ValuesArr) ParseStrings(key string) ([]string, error) {
 	str := valuesArr[key]
 	return str, nil
 }
 
 // ParseFile function
+// Return file in []byte, filename and error
 func (filesArr FilesArr) ParseFile(key string) ([]byte, string, error) {
 	fileHeaderStr := filesArr[key]
 	if len(fileHeaderStr) == 0 {

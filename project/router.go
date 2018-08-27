@@ -13,11 +13,16 @@ type Router struct {
 }
 
 // NewRouter function
+// Generate new Router
 func NewRouter() *Router {
 	var router *Router
 	router = &Router{
-		mainRoute: NewRoute(""),
+		mainRoute: &Route{
+			path:     "",
+			fullPath: "",
+		},
 	}
+	router.mainRoute.branches = make(map[string]*Route)
 	return router
 }
 
