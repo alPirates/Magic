@@ -33,14 +33,8 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if handler != nil {
 
 		context.Params = params
-		bytes, _ := ioutil.ReadAll(r.Body)
-		context.RawJSON = string(bytes)
-		queryParams, err := url.ParseQuery(r.URL.RawQuery)
-		if err == nil {
-			context.QueryParams = map[string][]string(queryParams)
-		}
 
-		err = r.ParseForm()
+		err := r.ParseForm()
 		if err == nil {
 			postParams := map[string][]string(r.PostForm)
 			context.PostParams = postParams
@@ -57,6 +51,14 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		headers := map[string][]string(r.Header)
 
 		context.Headers = headers
+
+		bytes, _ := ioutil.ReadAll(r.Body)
+		context.RawJSON = string(bytes)
+		queryParams, err := url.ParseQuery(r.URL.RawQuery)
+		if err == nil {
+			context.QueryParams = map[string][]string(queryParams)
+		}
+		defer r.Body.Close()
 
 		startHandler(context, middlewares, handler)
 	} else {
