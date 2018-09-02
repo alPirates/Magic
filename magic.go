@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // Magic structure
@@ -69,26 +68,22 @@ func (magic *Magic) DELETE(path string, handler func(context *Context) error) {
 
 // FILE function
 // Add get handler for file to route
-func (magic *Magic) FILE(path, filename string) {
-	magic.router.mainRoute.add(path, "GET", func(context *Context) error {
-		http.ServeFile(context.Writer, context.Request, filename)
-		return nil
-	})
+func (magic *Magic) FILE(path, fileName string) {
+	magic.router.mainRoute.FILE(path, fileName)
 }
 
 // STATIC function
 // Add static route
 // Full path must't contain params like "/a/:id/static"
 func (magic *Magic) STATIC(path, filePathName string) {
-	route := magic.router.mainRoute
-	if strings.Contains(route.fullPath+path, ":") {
-		panic(errStaticRouteParams.Error() + ": " + route.fullPath + path)
-	}
-	magic.router.mainRoute.add(path, "STATIC", func(context *Context) error {
-		fileName := strings.SplitN(context.Request.URL.Path, route.fullPath+path, 2)[1]
-		http.ServeFile(context.Writer, context.Request, filePathName+fileName)
-		return nil
-	})
+	magic.router.mainRoute.STATIC(path, filePathName)
+}
+
+// CUSTOM function
+// Can be STATIC or FILE
+// In static you can get filename in storage | context.Storage["fileName"]
+func (magic *Magic) CUSTOM(path, method string, handler func(context *Context) error) {
+	magic.router.mainRoute.CUSTOM(path, method, handler)
 }
 
 // SetMaxBytes function
