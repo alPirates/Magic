@@ -85,9 +85,38 @@ func (route *Route) STATIC(path, filePathName string) {
 	})
 }
 
+// CUSTOM function
+// Can be STATIC or FILE
+// In static you can get filename in storage | context.Storage["fileName"]
+func (route *Route) CUSTOM(path, method string, handler func(context *Context) error) {
+	switch method {
+	case "STATIC":
+		if strings.Contains(route.fullPath+path, ":") {
+			panic(errStaticRouteParams.Error() + ": " + route.fullPath + path)
+		}
+		route.add(path, method, func(context *Context) error {
+			fileName := strings.SplitN(context.Request.URL.Path, route.fullPath+path, 2)[1]
+			context.Storage["fileName"] = fileName
+			return handler(context)
+		})
+		break
+	case "FILE":
+		route.add(path, "GET", func(context *Context) error {
+			return handler(context)
+		})
+		break
+	default:
+		panic(errMethod)
+	}
+}
+
 func (route *Route) add(path, method string, handler func(*Context) error) {
 	nowRoute := route
 	branches := strings.Split(path, "/")
+	if len(branches) == 2 && branches[1] == "" {
+		setMethod(nowRoute, method, route.fullPath+path, handler)
+		return
+	}
 	len := len(branches)
 	for i := 1; i < len; i++ {
 		if nowRoute.isStatic {
@@ -110,7 +139,11 @@ func (route *Route) add(path, method string, handler func(*Context) error) {
 			nowRoute = nextRoute
 		}
 	}
-	nowRoute.fullPath = route.fullPath + path
+	setMethod(nowRoute, method, route.fullPath+path, handler)
+}
+
+func setMethod(nowRoute *Route, method, fullpath string, handler func(*Context) error) {
+	nowRoute.fullPath = fullpath
 	nowRoute.isStatic = false
 	switch method {
 	case "POST":
@@ -168,6 +201,9 @@ func (route *Route) find(path, method string) (func(*Context) error, []Middlewar
 	middlewares = append(middlewares, route.middlewares...)
 	branches := strings.Split(path, "/")
 	len := len(branches)
+	if len == 2 && branches[1] == "" {
+		return getFuncByMethod(nowRoute, method), middlewares, params
+	}
 	for i := 1; i < len; i++ {
 		if nowRoute.isStatic {
 			break
@@ -184,7 +220,10 @@ func (route *Route) find(path, method string) (func(*Context) error, []Middlewar
 		nowRoute = nextRoute
 		middlewares = append(middlewares, nowRoute.middlewares...)
 	}
+	return getFuncByMethod(nowRoute, method), middlewares, params
+}
 
+func getFuncByMethod(nowRoute *Route, method string) func(*Context) error {
 	var result func(*Context) error
 	switch method {
 	case "POST":
@@ -202,5 +241,5 @@ func (route *Route) find(path, method string) (func(*Context) error, []Middlewar
 	default:
 		result = nil
 	}
-	return result, middlewares, params
+	return result
 }

@@ -18,6 +18,7 @@ var (
 	MaxBytes             = int64(10000000)
 	errStaticRoute       = errors.New("can't add route to static route")
 	errStaticRouteParams = errors.New("can't add route to path which contains params")
+	errMethod            = errors.New("invalid method")
 	magic                *Magic
 )
 
