@@ -95,7 +95,7 @@ func (route *Route) CUSTOM(path, method string, handler func(context *Context) e
 			panic(errStaticRouteParams.Error() + ": " + route.fullPath + path)
 		}
 		route.add(path, method, func(context *Context) error {
-			fileName := strings.SplitN(context.Request.URL.Path, route.fullPath+path, 2)[1]
+			fileName := strings.SplitN(context.Request.URL.Path, route.fullPath+path+"/", 2)[1]
 			context.Storage["fileName"] = fileName
 			return handler(context)
 		})
@@ -114,7 +114,7 @@ func (route *Route) add(path, method string, handler func(*Context) error) {
 	nowRoute := route
 	branches := strings.Split(path, "/")
 	if len(branches) == 2 && branches[1] == "" {
-		setMethod(nowRoute, method, route.fullPath+path, handler)
+		setMethod(nowRoute, method, "", handler)
 		return
 	}
 	len := len(branches)
