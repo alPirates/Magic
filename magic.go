@@ -2,7 +2,13 @@ package magic
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"sync"
+)
+
+var (
+	wait = &sync.WaitGroup{}
 )
 
 // Magic structure
@@ -22,6 +28,7 @@ var (
 
 // NewMagic function
 func NewMagic(port string) *Magic {
+	wait.Add(1)
 	magic = &Magic{
 		server: &http.Server{
 			Addr: ":" + port,
@@ -91,23 +98,43 @@ func (magic *Magic) SetMaxBytes(maxBytes int64) {
 	MaxBytes = maxBytes
 }
 
+// Close function
+// Close all routes (server)
+func (magic *Magic) Close() {
+	magic.server.Close()
+}
+
+// Restart function
+// Restart magic (server)
+func (magic *Magic) Restart() {
+	wait.Add(1)
+	magic.server.Close()
+	go magic.start(wait)
+}
+
 // ListenAndServe function
 // Start server
 func (magic *Magic) ListenAndServe() {
-	// fmt.Println("")
-	// fmt.Println(
-	// 	` -----------------------------------------------------`)
-	// fmt.Println("")
-	// fmt.Println(" "+
-	// 	`    __   __     __     _______    ________   _______`+"\n",
-	// 	`   /  | /  |   /  \   |   ____|  |__    __| |   ____|`+"\n",
-	// 	`  /   |/   |  / /\ \  |  | ____     |  |    |  |`+"\n",
-	// 	` /   __    | |  \/  | |  |__|  |  __|  |__  |  |____`+"\n",
-	// 	`/___/  |___| |__/\__| |________| |________| |_______|`+"\n",
-	// )
-	// fmt.Println("")
-	// fmt.Println(
-	// 	` -----------------------------------------------------`)
-	// fmt.Println("")
+	fmt.Println("")
+	fmt.Println(
+		` -----------------------------------------------------`)
+	fmt.Println("")
+	fmt.Println(" "+
+		`    __   __     __     _______    ________   _______`+"\n",
+		`   /  | /  |   /  \   |   ____|  |__    __| |   ____|`+"\n",
+		`  /   |/   |  / /\ \  |  | ____     |  |    |  |`+"\n",
+		` /   __    | |  \/  | |  |__|  |  __|  |__  |  |____`+"\n",
+		`/___/  |___| |__/\__| |________| |________| |_______|`+"\n",
+	)
+	fmt.Println("")
+	fmt.Println(
+		` -----------------------------------------------------`)
+	fmt.Println("")
+	go magic.start(wait)
+	wait.Wait()
+}
+
+func (magic *Magic) start(wait *sync.WaitGroup) {
 	magic.server.ListenAndServe()
+	wait.Done()
 }

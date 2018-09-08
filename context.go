@@ -4,15 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // Context structure
 // Writer - standert ResponseWriter
 // Request - standart Request
-// RawJSON - all in body
+// Body - all in body
 // Params - params in url (/:id)
 // QueryParams - query params in url (?param1=1&param2=2)
 // MultipartParams - standart multipartParams without files
@@ -23,7 +25,7 @@ import (
 type Context struct {
 	Writer          http.ResponseWriter
 	Request         *http.Request
-	RawJSON         string
+	Body            string
 	Params          Values
 	QueryParams     ValuesArr
 	MultipartParams ValuesArr
@@ -62,18 +64,54 @@ func (context *Context) SendJSON(j map[string]interface{}) error {
 }
 
 // SendString function
-// Send string leke "something"
+// Send string like "something"
 func (context *Context) SendString(str string) error {
 	fmt.Fprint(context.Writer, str)
 	return nil
 }
 
+// SendFile function
+// Send os.file by name like "index.html"
+func (context *Context) SendFile(fileName string) error {
+	http.ServeFile(context.Writer, context.Request, fileName)
+	return nil
+}
+
+// SendFileBytes function
+// Send bytes as file
+func (context *Context) SendFileBytes(fileName string, bytes []byte) error {
+	mas := strings.Split(fileName, ".")
+	if len(mas) != 0 {
+		mas[0] = mime.TypeByExtension("." + mas[len(mas)-1])
+	} else {
+		mas = append(mas, "text/plain")
+	}
+	map[string][]string(context.Headers)["Content-Type"] = []string{mas[0]}
+	return context.SendString(string(bytes))
+}
+
 // ParseJSON function
 // Parse JSON in body to your interface
 func (context *Context) ParseJSON(iface interface{}) error {
-	err := json.Unmarshal([]byte(context.RawJSON), iface)
+	err := json.Unmarshal([]byte(context.Body), iface)
 	return err
 }
+
+// TEST
+// // Bind function
+// // Get data from all and put in interface
+// func (context *Context) Bind(iface interface{}) error {
+// 	values := reflect.ValueOf(iface).Elem()
+// 	for i := 0; i < values.NumField(); i++ {
+// 		f := values.Field(i)
+// 		fmt.Print(values.Type().Field(i).Name)
+// 		fmt.Print(" ")
+// 		fmt.Print(f.Type())
+// 		fmt.Print(" ")
+// 		fmt.Println(f.Interface())
+// 	}
+// 	return nil
+// }
 
 // FilesArr structure
 // It is map[string][]*multipart.FileHeader
