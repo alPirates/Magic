@@ -86,6 +86,7 @@ func (context *Context) SendFileBytes(fileName string, bytes []byte) error {
 	} else {
 		mas = append(mas, "text/plain")
 	}
+	context.Writer.Header().Set("Content-Type", mas[0])
 	map[string][]string(context.Headers)["Content-Type"] = []string{mas[0]}
 	return context.SendString(string(bytes))
 }
