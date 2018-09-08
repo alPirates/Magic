@@ -1,6 +1,7 @@
 package magic
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -28,7 +29,6 @@ var (
 
 // NewMagic function
 func NewMagic(port string) *Magic {
-	wait.Add(1)
 	magic = &Magic{
 		server: &http.Server{
 			Addr: ":" + port,
@@ -107,9 +107,10 @@ func (magic *Magic) Close() {
 // Restart function
 // Restart magic (server)
 func (magic *Magic) Restart() {
+	fmt.Println("add")
 	wait.Add(1)
-	magic.server.Close()
-	go magic.start(wait)
+	magic.server.Shutdown(context.Background())
+	go magic.start()
 }
 
 // ListenAndServe function
@@ -130,11 +131,15 @@ func (magic *Magic) ListenAndServe() {
 	fmt.Println(
 		` -----------------------------------------------------`)
 	fmt.Println("")
-	go magic.start(wait)
+	wait.Add(1)
+	go magic.start()
 	wait.Wait()
 }
 
-func (magic *Magic) start(wait *sync.WaitGroup) {
-	magic.server.ListenAndServe()
+func (magic *Magic) start() {
+	err := magic.server.ListenAndServe()
+	for err != nil {
+		err = magic.server.ListenAndServe()
+	}
 	wait.Done()
 }
