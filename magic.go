@@ -3,7 +3,6 @@ package magic
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"sync"
 )
@@ -107,7 +106,6 @@ func (magic *Magic) Close() {
 // Restart function
 // Restart magic (server)
 func (magic *Magic) Restart() {
-	fmt.Println("add")
 	wait.Add(1)
 	magic.server.Shutdown(context.Background())
 	go magic.start()
@@ -116,21 +114,21 @@ func (magic *Magic) Restart() {
 // ListenAndServe function
 // Start server
 func (magic *Magic) ListenAndServe() {
-	fmt.Println("")
-	fmt.Println(
-		` -----------------------------------------------------`)
-	fmt.Println("")
-	fmt.Println(" "+
-		`    __   __     __     _______    ________   _______`+"\n",
-		`   /  | /  |   /  \   |   ____|  |__    __| |   ____|`+"\n",
-		`  /   |/   |  / /\ \  |  | ____     |  |    |  |`+"\n",
-		` /   __    | |  \/  | |  |__|  |  __|  |__  |  |____`+"\n",
-		`/___/  |___| |__/\__| |________| |________| |_______|`+"\n",
-	)
-	fmt.Println("")
-	fmt.Println(
-		` -----------------------------------------------------`)
-	fmt.Println("")
+	// fmt.Println("")
+	// fmt.Println(
+	// 	` -----------------------------------------------------`)
+	// fmt.Println("")
+	// fmt.Println(" "+
+	// 	`    __   __     __     _______    ________   _______`+"\n",
+	// 	`   /  | /  |   /  \   |   ____|  |__    __| |   ____|`+"\n",
+	// 	`  /   |/   |  / /\ \  |  | ____     |  |    |  |`+"\n",
+	// 	` /   __    | |  \/  | |  |__|  |  __|  |__  |  |____`+"\n",
+	// 	`/___/  |___| |__/\__| |________| |________| |_______|`+"\n",
+	// )
+	// fmt.Println("")
+	// fmt.Println(
+	// 	` -----------------------------------------------------`)
+	// fmt.Println("")
 	wait.Add(1)
 	go magic.start()
 	wait.Wait()
